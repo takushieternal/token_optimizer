@@ -1,0 +1,54 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Token_Optimizer — savings stress test</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#0d1117;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+.wrap{max-width:860px;margin:24px auto;padding:0 18px}
+h1{font-size:20px;margin:0 0 2px} .sub{color:#6e7681;font-size:12px;margin-bottom:16px}
+.head{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 18px}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:11px;padding:12px 15px;flex:1;min-width:180px}
+.stat .big{font-size:26px;font-weight:700} .stat .lab{color:#9aa4b2;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.card{background:#161b22;border:1px solid #30363d;border-radius:11px;padding:14px 16px;margin-bottom:14px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:#9aa4b2;margin:0 0 12px}
+.brow{display:flex;align-items:center;gap:10px;margin:6px 0;font-size:12px}
+.blabel{width:230px;color:#c9d1d9;flex:none} .btrack{flex:1;background:#0d1117;border:1px solid #21262d;border-radius:5px;height:20px;position:relative}
+.bfill{height:100%;border-radius:4px 0 0 4px} .bval{position:absolute;right:7px;top:1px;font-size:11px;color:#e6edf3}
+table{width:100%;border-collapse:collapse;font-size:12.5px} th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #21262d}
+th{color:#9aa4b2;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.4px} td.n{text-align:right;font-variant-numeric:tabular-nums} td.hi{color:#3fb950;font-weight:700}
+.legend{font-size:11px;color:#6e7681;margin-top:8px} .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin:0 4px 0 10px;vertical-align:middle}
+select{background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:3px 7px;font-size:12px}
+.note{color:#8b949e;font-size:12px;line-height:1.5} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+.foot{color:#6e7681;font-size:11px;margin-top:6px}
+</style></head><body><div class="wrap">
+<h1>&#129518; Token_Optimizer — savings stress test</h1>
+<div class="sub">A/B measured with tiktoken cl100k_base (proxy for Claude; savings ratio is tokenizer-robust) &middot; generated 2026-07-06T22:37:30Z</div>
+
+<div class="head">
+  <div class="stat"><div class="lab">Saved / heavy session</div><div class="big">451,104</div><div class="lab">tokens</div></div>
+  <div class="stat"><div class="lab">Est. $ / heavy session</div><div class="big" id="usd">$--</div>
+     <div class="lab"><select id="rate" onchange="upd()"></select></div></div>
+  <div class="stat"><div class="lab">Biggest lever</div><div class="big" style="font-size:15px">Trim tool output at the source</div>
+     <div class="lab">191,820 tokens</div></div>
+</div>
+
+<div class="card"><h2>Tokens saved per move, one heavy session</h2><div class="brow"><div class="blabel">Trim tool output at the source</div><div class="btrack"><div class="bfill" style="width:100.0%;background:#58a6ff"></div><span class="bval">191,820</span></div></div><div class="brow"><div class="blabel">Pull deltas, not the world</div><div class="btrack"><div class="bfill" style="width:67.6%;background:#58a6ff"></div><span class="bval">129,732</span></div></div><div class="brow"><div class="blabel">Verify with sentinels, not re-reads</div><div class="btrack"><div class="bfill" style="width:50.8%;background:#58a6ff"></div><span class="bval">97,392</span></div></div><div class="brow"><div class="blabel">Reference by hash, don&#x27;t re-quote</div><div class="btrack"><div class="bfill" style="width:9.7%;background:#58a6ff"></div><span class="bval">18,696</span></div></div><div class="brow"><div class="blabel">Spend 30s on the spec</div><div class="btrack"><div class="bfill" style="width:2.9%;background:#e3b341"></div><span class="bval">5,629</span></div></div><div class="brow"><div class="blabel">Batch the round trips</div><div class="btrack"><div class="bfill" style="width:1.6%;background:#58a6ff"></div><span class="bval">3,150</span></div></div><div class="brow"><div class="blabel">Keep state files (warm starts)</div><div class="btrack"><div class="bfill" style="width:1.5%;background:#58a6ff"></div><span class="bval">2,920</span></div></div><div class="brow"><div class="blabel">Encode procedures as skills</div><div class="btrack"><div class="bfill" style="width:0.9%;background:#58a6ff"></div><span class="bval">1,765</span></div></div>
+  <div class="legend"><i style="background:#58a6ff"></i>input-side (context/tool output)<i style="background:#e3b341"></i>output-side (avoided rework)</div>
+</div>
+
+<div class="card"><h2>The measurements</h2>
+<table><thead><tr><th>Move</th><th>Naive</th><th>Optimized</th><th>Saved/use</th><th>x/sess</th><th>Session</th><th>Cut</th></tr></thead>
+<tbody><tr><td>Trim tool output at the source</td><td class="n">9,599</td><td class="n">8</td><td class="n">9,591</td><td class="n">20</td><td class="n hi">191,820</td><td class="n">99.9%</td></tr><tr><td>Pull deltas, not the world</td><td class="n">21,976</td><td class="n">354</td><td class="n">21,622</td><td class="n">6</td><td class="n hi">129,732</td><td class="n">98.4%</td></tr><tr><td>Verify with sentinels, not re-reads</td><td class="n">8,118</td><td class="n">2</td><td class="n">8,116</td><td class="n">12</td><td class="n hi">97,392</td><td class="n">100.0%</td></tr><tr><td>Reference by hash, don&#x27;t re-quote</td><td class="n">6,254</td><td class="n">22</td><td class="n">6,232</td><td class="n">3</td><td class="n hi">18,696</td><td class="n">99.6%</td></tr><tr><td>Spend 30s on the spec</td><td class="n">5,649</td><td class="n">20</td><td class="n">5,629</td><td class="n">1</td><td class="n hi">5,629</td><td class="n">99.6%</td></tr><tr><td>Batch the round trips</td><td class="n">600</td><td class="n">75</td><td class="n">525</td><td class="n">6</td><td class="n hi">3,150</td><td class="n">87.5%</td></tr><tr><td>Keep state files (warm starts)</td><td class="n">3,336</td><td class="n">416</td><td class="n">2,920</td><td class="n">1</td><td class="n hi">2,920</td><td class="n">87.5%</td></tr><tr><td>Encode procedures as skills</td><td class="n">366</td><td class="n">13</td><td class="n">353</td><td class="n">5</td><td class="n hi">1,765</td><td class="n">96.4%</td></tr></tbody></table>
+<div class="foot">Naive/Optimized = real token counts of each path. "x/sess" = assumed invocations on a heavy session (an input, not a measurement). Session = Saved/use x/sess.</div>
+</div>
+
+<div class="card"><h2>Reading this honestly</h2>
+<div class="note">Per-use savings are <b>measured</b> on real artifacts. The per-session total leans on the frequency assumptions above — change them and the total moves. The tokenizer is a <b>proxy</b>, so treat absolute counts as calibrated estimates; the reduction percentages are the robust part. And the largest real saver — spending 30 seconds on the spec — is <b>under-counted here</b>, because a wrong deliverable you never build is a cost you can't fully see. On a subscription plan the dollars are really <b>headroom against your usage limits</b>, not cash.</div>
+</div>
+<div class="foot">Re-run: <span class="mono">python stress_test.py</span> &middot; raw numbers in results.json</div>
+</div>
+<script>
+const RATES={"Introductory (through 2026-08-31)": {"in": 2.0, "out": 10.0}, "Standard": {"in": 3.0, "out": 15.0}, "Opus 4.8": {"in": 5.0, "out": 25.0}}, SIN=445475, SOUT=5629;
+const sel=document.getElementById('rate');
+Object.keys(RATES).forEach(k=>{const o=document.createElement('option');o.value=k;o.text=k;sel.add(o);});
+function upd(){const r=RATES[sel.value];const d=SIN/1e6*r.in+SOUT/1e6*r.out;document.getElementById('usd').textContent='$'+d.toFixed(2);}
+upd();
+</script></body></html>
