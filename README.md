@@ -60,13 +60,6 @@ figure per session is modest — but it compounds across every heavy session.
 - On a **subscription plan** you don't pay per token, so the dollars are really
   **headroom against your usage limits**, not cash.
 
-## Files
-
-- `stress_test.py` — the test itself. Re-run with `python stress_test.py`. It needs
-  `tiktoken` (`pip install tiktoken`); without it, it falls back to a chars/4 estimate.
-- `results.json` — the raw numbers.
-- `token-savings-report.html` — a self-contained visual report; open it in any browser.
-
 ## Verdict
 
 Clearly net-positive on tool-heavy sessions — real dollars on the big ones, or genuine
