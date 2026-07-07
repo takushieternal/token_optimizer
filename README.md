@@ -66,10 +66,6 @@ did when they were added.
   **headroom against your usage limits**, not cash.
 
 ## Files
-
-- `stress_test.py` — the test itself. Re-run with `python stress_test.py`. Needs `tiktoken`
-  (`pip install tiktoken`); without it, it falls back to a chars/4 estimate.
-- `results.json` — the raw numbers.
 - `token-savings-report.html` — a self-contained visual report; open it in any browser.
 
 ## Verdict
