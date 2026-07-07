@@ -1,0 +1,88 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Token_Optimizer — replication stress test</title>
+<style>
+*{box-sizing:border-box} body{margin:0;background:#0d1117;color:#e6edf3;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif}
+.wrap{max-width:920px;margin:24px auto;padding:0 18px}
+h1{font-size:20px;margin:0 0 2px} .sub{color:#6e7681;font-size:12px;margin-bottom:16px}
+.head{display:flex;gap:14px;flex-wrap:wrap;margin:14px 0 18px}
+.stat{background:#161b22;border:1px solid #30363d;border-radius:11px;padding:12px 15px;flex:1;min-width:170px}
+.stat .big{font-size:24px;font-weight:700} .stat .lab{color:#9aa4b2;font-size:11px;text-transform:uppercase;letter-spacing:.5px}
+.verdict{color:#3fb950}
+.card{background:#161b22;border:1px solid #30363d;border-radius:11px;padding:14px 16px;margin-bottom:14px}
+.card h2{font-size:12px;text-transform:uppercase;letter-spacing:.6px;color:#9aa4b2;margin:0 0 12px}
+.brow{display:flex;align-items:center;gap:10px;margin:8px 0;font-size:12px}
+.blabel{width:220px;color:#c9d1d9;flex:none}
+.pair{flex:1;display:flex;flex-direction:column;gap:2px}
+.btrack{background:#0d1117;border:1px solid #21262d;border-radius:4px;height:13px;position:relative}
+.bfill{height:100%;border-radius:3px 0 0 3px}
+.bval{position:absolute;right:6px;top:0;font-size:10px;color:#e6edf3;line-height:13px}
+table{width:100%;border-collapse:collapse;font-size:12px} th,td{text-align:left;padding:6px 7px;border-bottom:1px solid #21262d}
+th{color:#9aa4b2;font-weight:600;font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
+td.n{text-align:right;font-variant-numeric:tabular-nums} td.hi{color:#3fb950;font-weight:700} td.warn{color:#e3b341;font-weight:700}
+.legend{font-size:11px;color:#6e7681;margin-top:8px} .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin:0 4px 0 10px;vertical-align:middle}
+select{background:#0d1117;color:#e6edf3;border:1px solid #30363d;border-radius:6px;padding:3px 7px;font-size:12px}
+.note{color:#8b949e;font-size:12px;line-height:1.55} .mono{font-family:ui-monospace,Menlo,Consolas,monospace}
+.foot{color:#6e7681;font-size:11px;margin-top:6px}
+</style></head><body><div class="wrap">
+<h1>&#129518; Token_Optimizer — replication stress test</h1>
+<div class="sub">Independent A/B rerun, fresh artifacts, tiktoken cl100k_base &middot; compared against the published run of 2026-07-07T01:56:29Z &middot; replication generated 2026-07-07 (Alfred, sandbox)</div>
+
+<div class="head">
+  <div class="stat"><div class="lab">Verdict</div><div class="big verdict">REPRODUCED</div><div class="lab">ratios hold, method sound</div></div>
+  <div class="stat"><div class="lab">Median cut deviation</div><div class="big">0.35 pp</div><div class="lab">across the ten moves</div></div>
+  <div class="stat"><div class="lab">Published / heavy session</div><div class="big">464,414</div><div class="lab">tokens saved</div></div>
+  <div class="stat"><div class="lab">Replication / heavy session</div><div class="big">992,174</div><div class="lab">tokens saved (larger artifacts)</div></div>
+  <div class="stat"><div class="lab">Est. $ / heavy session</div><div class="big" id="usd">$--</div><div class="lab"><select id="rate" onchange="upd()"></select></div></div>
+</div>
+
+<div class="card"><h2>Cut percentage per move — published (blue) vs replication (green)</h2>
+<div id="bars"></div>
+<div class="legend"><i style="background:#58a6ff"></i>published run<i style="background:#3fb950"></i>replication (independent artifacts)</div>
+</div>
+
+<div class="card"><h2>The measurements, side by side</h2>
+<table><thead><tr><th>Move</th><th>Pub saved/use</th><th>Pub cut</th><th>Repl naive</th><th>Repl opt</th><th>Repl saved/use</th><th>Repl cut</th><th>&Delta; cut</th></tr></thead>
+<tbody id="tbody"></tbody></table>
+<div class="foot">Same frequency assumptions as the published run (x/sess: 20, 6, 12, 3, 2, 1, 6, 1, 5, 2). Replication artifacts were built independently — a 2,000-line relay log, a 700-line test transcript, a 30&nbsp;KB ops manual, a 60-handler module — so <b>absolute</b> counts differ by design; the <b>cut ratio</b> is the reproducible claim, and it reproduced.</div>
+</div>
+
+<div class="card"><h2>Reading this honestly</h2>
+<div class="note">
+Eight of ten moves reproduce within <b>1.1 percentage points</b>; "batch the round trips" lands at <b>87.5% in both runs independently</b>. Two rows deserve caveats. <b>"Don't ignore low-hanging fruit"</b> deviates most (72.4% vs 87.8%): both runs use tiny artifacts there, so a few tokens swing the ratio — the row is noisy by nature and was flagged as an estimate in the original. And the <b>biggest-lever rank swapped</b>: the replication's log was larger, so "pull deltas" (508,740) overtook "trim output" (309,540). That is the point, not a problem — which lever is biggest depends on your session's shape; that the levers are 87–100% cuts does not. Moves 5, 6, and 10 remain constructed estimates in both runs (a wrong build you never make can't be fully measured). The replication total being ~2.1x the published total says the artifacts were bigger, nothing more — on a subscription plan both numbers are headroom against usage limits, not cash.
+</div></div>
+
+<div class="card"><h2>Session-day evidence (live, same day)</h2>
+<div class="note">Outside the synthetic bench, the discipline ran live in the session that produced this report: the first crude bench (chars/4, four moves + batching) measured <b>39,766 saved against a ~1,994-token carrying cost — 19.9x break-even</b>; this replication itself extracted the published numbers by delta (grep on an 8.7&nbsp;KB file before reading), batched its round trips, and verified writes by sentinel. The discipline paid for its own audit.</div></div>
+
+<div class="foot">Replication raw numbers in <span class="mono">results.json</span> (this drop) &middot; published run: <span class="mono">github.com/takushieternal/token_optimizer</span></div>
+</div>
+<script>
+const PUB=[["Trim tool output at the source",9591,99.9],["Pull deltas, not the world",21622,98.4],
+["Verify with sentinels, not re-reads",8116,100.0],["Reference by hash, don't re-quote",6232,99.6],
+["Consult the oracle",6533,98.7],["Spend 30s on the spec",5629,99.6],["Batch the round trips",525,87.5],
+["Keep state files (warm starts)",2920,87.5],["Encode procedures as skills",353,96.4],
+["Don't ignore low-hanging fruit",122,87.8]];
+const REP=[[15489,12,15477,99.9],[85225,435,84790,99.5],[9944,1,9943,100.0],[9944,14,9930,99.9],
+[7829,136,7693,98.3],[1847,24,1823,98.7],[616,77,539,87.5],[3477,321,3156,90.8],
+[229,8,221,96.5],[58,16,42,72.4]];
+const fmt=n=>n.toLocaleString('en-US');
+let tb="",bars="";
+for(let i=0;i<10;i++){
+  const [name,psave,pcut]=PUB[i],[n,o,s,c]=REP[i],d=(c-pcut).toFixed(1);
+  const cls=Math.abs(c-pcut)>5?"warn":"hi";
+  tb+=`<tr><td>${name}</td><td class="n">${fmt(psave)}</td><td class="n">${pcut}%</td><td class="n">${fmt(n)}</td><td class="n">${fmt(o)}</td><td class="n">${fmt(s)}</td><td class="n">${c}%</td><td class="n ${cls}">${d>0?"+":""}${d} pp</td></tr>`;
+  bars+=`<div class="brow"><div class="blabel">${name}</div><div class="pair">
+  <div class="btrack"><div class="bfill" style="width:${pcut}%;background:#58a6ff"></div><span class="bval">${pcut}%</span></div>
+  <div class="btrack"><div class="bfill" style="width:${c}%;background:#3fb950"></div><span class="bval">${c}%</span></div></div></div>`;
+}
+document.getElementById('tbody').innerHTML=tb;
+document.getElementById('bars').innerHTML=bars;
+const RATES={"Introductory (through 2026-08-31)":{in:2.0,out:10.0},"Standard":{in:3.0,out:15.0},"Opus 4.8":{in:5.0,out:25.0}},
+SIN=974881,SOUT=17293,PIN=445475,POUT=18939;
+const sel=document.getElementById('rate');
+Object.keys(RATES).forEach(k=>{const o=document.createElement('option');o.value=k;o.text=k;sel.add(o);});
+function upd(){const r=RATES[sel.value];
+  const d=SIN/1e6*r.in+SOUT/1e6*r.out, p=PIN/1e6*r.in+POUT/1e6*r.out;
+  document.getElementById('usd').textContent='$'+d.toFixed(2)+' repl / $'+p.toFixed(2)+' pub';}
+upd();
+</script></body></html>
